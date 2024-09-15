@@ -7,20 +7,20 @@ const fs = require('fs')
 const Log = require('../lib/logging')
 const path = require('path')
 const { spawnSync } = require('child_process')
-const util = require('../lib/util')
+const utl = require('../lib/utl')
 
 Log.progress('Performing initial checkout of brave-core')
 
 const braveCoreDir = path.resolve(__dirname, '..', 'src', 'brave')
-const braveCoreRef = util.getProjectVersion('brave-core')
+const braveCoreRef = utl.getProjectVersion('brave-core')
 
 if (!fs.existsSync(path.join(braveCoreDir, '.git'))) {
   Log.status(`Cloning brave-core [${braveCoreRef}] into ${braveCoreDir}...`)
   fs.mkdirSync(braveCoreDir)
-  util.runGit(braveCoreDir, ['clone', util.getNPMConfig(['projects', 'brave-core', 'repository', 'url']), '.'])
-  util.runGit(braveCoreDir, ['checkout', braveCoreRef])
+  utl.runGit(braveCoreDir, ['clone', utl.getNPMConfig(['projects', 'brave-core', 'repository', 'url']), '.'])
+  utl.runGit(braveCoreDir, ['checkout', braveCoreRef])
 }
-const braveCoreSha = util.runGit(braveCoreDir, ['rev-parse', 'HEAD'])
+const braveCoreSha = utl.runGit(braveCoreDir, ['rev-parse', 'HEAD'])
 Log.progress(`brave-core repo at ${braveCoreDir} is at commit ID ${braveCoreSha}`)
 
 let npmCommand = 'npm'
@@ -28,9 +28,9 @@ if (process.platform === 'win32') {
   npmCommand += '.cmd'
 }
 
-util.run(npmCommand, ['install'], { cwd: braveCoreDir })
+utl.run(npmCommand, ['install'], { cwd: braveCoreDir })
 
-util.run(npmCommand, ['run', 'sync' ,'--', '--init'].concat(process.argv.slice(2)), {
+utl.run(npmCommand, ['run', 'sync' ,'--', '--init'].concat(process.argv.slice(2)), {
   cwd: braveCoreDir,
   env: process.env,
   stdio: 'inherit',
